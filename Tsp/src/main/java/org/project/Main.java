@@ -1,5 +1,7 @@
 package org.project;
 
+import org.project.algorithm.Christofides;
+import org.project.algorithm.GreedyAlgorithm;
 import org.project.algorithm.MinimumSpanningTree;
 import org.project.entity.Connect;
 import org.project.entity.Point;
@@ -15,5 +17,7 @@ public class Main {
         List<Point> csvData = CsvReader.parseData(csvPath);
 
         List<Connect> connections = MinimumSpanningTree.addConnections(csvData);
+        Christofides.tsp(csvData);
+        GreedyAlgorithm.tsp(csvData);
     }
 }

@@ -1,6 +1,6 @@
-package org.project.preprocess;
+package org.project.entity;
 
-public class Data {
+public class Point {
 
     String crimeId;
     Double latitude;

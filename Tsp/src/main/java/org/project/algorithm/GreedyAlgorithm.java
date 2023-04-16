@@ -80,7 +80,6 @@ public class GreedyAlgorithm {
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         double distance = radius * c;
-//        System.out.println(lat1 + " " + lon1 + " " + lat2 + " " + lon2 + " = " + distance);
         return distance;
     }
 

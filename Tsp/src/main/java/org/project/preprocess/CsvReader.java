@@ -18,12 +18,15 @@ public class CsvReader {
             CSVReader csvReader = new CSVReaderBuilder(csv).withSkipLines(1).build();
 
             String[] lineData;
+            int id = 0;
             while ((lineData = csvReader.readNext()) != null) {
                 Point data = new Point();
                 data.setCrimeId(lineData[0].substring(lineData[0].length()-5));
                 data.setLongitude(Double.valueOf(lineData[1]));
                 data.setLatitude(Double.valueOf(lineData[2]));
+                data.setId(id);
                 csvData.add(data);
+                id += 1;
             }
             csvReader.close();
             csv.close();

@@ -5,7 +5,7 @@ public class Point {
     String crimeId;
     Double latitude;
     Double longitude;
-
+    Integer id;
     public String getCrimeId() {
         return crimeId;
     }
@@ -28,5 +28,13 @@ public class Point {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

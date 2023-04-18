@@ -29,7 +29,7 @@ public class ThreeOptSwapOptimization {
         for(Integer tour1 : tour) {
             for(Point point : points) {
                 if(point.getId().equals(tour1)) {
-                    System.out.println(point.getCrimeId() + "->");
+                    System.out.print(point.getCrimeId() + "->");
                 }
             }
         }

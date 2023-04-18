@@ -1,6 +1,8 @@
 package org.project.algorithm;
 
 import org.project.entity.Point;
+import org.project.optimization.AntColonyOptimization;
+import org.project.optimization.SimulatedAnnealing;
 import org.project.optimization.ThreeOptSwapOptimization;
 import org.project.optimization.TwoOptSwapOptimization;
 
@@ -31,7 +33,6 @@ public class Christofides {
         double[][] matching = getMinimumMatching(tsp_g, oddVertices);
 
         //Combine the minimum spanning tree and minimum weight perfect matching
-
         double minCost = Double.POSITIVE_INFINITY;
         List<Integer> finalTour = new ArrayList<>();
         int index = 0;
@@ -67,16 +68,34 @@ public class Christofides {
         double costTwoOpt = calculateTourCost(tsp_g, hamiltonianTwoOpt);
         System.out.println("\nMinimum Cost Two Opt is: " + costTwoOpt + "\n");
 
-//        List<Integer> hamiltonianThreeOpt = ThreeOptSwapOptimization.getHamiltonianTourThreeOpt(eulerTour, tsp_g, points);
-//        double costThreeOpt = calculateTourCost(tsp_g, hamiltonianThreeOpt);
-//        System.out.println("\nMinimum Cost Three Opt is: " + costThreeOpt + "\n");
+        List<Integer> hamiltonianThreeOpt = ThreeOptSwapOptimization.getHamiltonianTourThreeOpt(eulerTour, tsp_g, points);
+        double costThreeOpt = calculateTourCost(tsp_g, hamiltonianThreeOpt);
+        System.out.println("\nMinimum Cost Three Opt is: " + costThreeOpt + "\n");
 
-//        List<Integer> annealedTour = simulatedAnnealing(tsp_g, hamiltonianTwoOpt, 1000000, 0.01);
+        double annealedTour = SimulatedAnnealing.simulate(hamiltonianTwoOpt, tsp_g, points);
 //        double costSimulatedAnnealing = calculateTourCost(tsp_g, annealedTour);
-//        System.out.println("Minimum Cost Simulated Annealing is: " + costSimulatedAnnealing);
+        System.out.println("\nMinimum Cost Simulated Annealing is: " + annealedTour + "\n");
+
+//
+//        int numAnts = 10;
+//        double alpha = 1.0;
+//        double beta = 5.0;
+//        double evaporationRate = 0.5;
+//        double initialPheromone = 0.1;
+//        int maxIterations = 100;
+//
+//// Create an instance of the AntColonyOptimizationTSP class
+//        AntColonyOptimization acoTSP = new AntColonyOptimization(
+//                tsp_g, numAnts, alpha, beta, evaporationRate, initialPheromone, maxIterations);
+//
+//// Solve the TSP problem using the ACO algorithm
+//        ArrayList<Integer> bestTour = acoTSP.solve();
+//        double costAnt = calculateTourCost(tsp_g, bestTour);
+//        System.out.println("\nMinimum Cost Ant is: " + costAnt + "\n");
+
     }
 
-    private static List<Integer> getOddVertices(double[][] graph) {
+    public static List<Integer> getOddVertices(double[][] graph) {
         List<Integer> oddVertices = new ArrayList<>();
         for (int i = 0; i < graph.length; i++) {
             int degree = 0;
@@ -89,7 +108,8 @@ public class Christofides {
         }
         return oddVertices;
     }
-    private static double[][] getMinimumMatching(double[][] graph, List<Integer> oddVertices) {
+
+    public static double[][] getMinimumMatching(double[][] graph, List<Integer> oddVertices) {
         double[][] matching = new double[graph.length][graph.length];
         for (int i = 0; i < oddVertices.size(); i++) {
             int u = oddVertices.get(i);
@@ -107,6 +127,7 @@ public class Christofides {
         }
         return matching;
     }
+
     public static double[][] combine(double[][] mst, double[][] matching) {
         int n = mst.length;
         double[][] combined = new double[n][n];
@@ -122,23 +143,39 @@ public class Christofides {
 
     public static List<Integer> getEulerTour(double[][] graph, int start) {
         List<Integer> tour = new ArrayList<>();
+        int currentVertex = start;
 
         Stack<Integer> stack = new Stack<>();
-        stack.push(start);
-
+        stack.push(currentVertex);
         while (!stack.isEmpty()) {
-            int currentVertex = stack.pop();
-            tour.add(currentVertex);
 
-            for (int i = graph.length - 1; i >= 0; i--) {
-                if (graph[currentVertex][i] != 0.0) {
-                    stack.push(i);
-                    graph[currentVertex][i] = 0.0;
-                    graph[i][currentVertex] = 0.0;
+            int vertex = stack.peek();
+            boolean hasUnvisitedEdges = false;
+
+            for (int i = 0; i < graph.length; i++) {
+                if (graph[vertex][i] != 0) {
+                    hasUnvisitedEdges = true;
+                    break;
                 }
             }
-        }
 
+            if (hasUnvisitedEdges) {
+                int nextVertex = -1;
+                for (int i = 0; i < graph.length; i++) {
+                    if (graph[vertex][i] != 0) {
+                        nextVertex = i;
+                        break;
+                    }
+                }
+
+                graph[vertex][nextVertex] = 0;
+                graph[nextVertex][vertex] = 0;
+                stack.push(nextVertex);
+            } else {
+                stack.pop();
+                tour.add(vertex);
+            }
+        }
         return tour;
     }
 
@@ -169,6 +206,7 @@ public class Christofides {
 
         return cost;
     }
+
     public static double calculateDistance(Double lat1, Double lon1, Double lat2, Double lon2) {
         double radius = 6371;
         double dLat = Math.toRadians(lat2 - lat1);
@@ -179,45 +217,8 @@ public class Christofides {
                         Math.sin(dLon/2) * Math.sin(dLon/2);
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        double distance = radius * c;
+        double distance = radius * c * 1000;
         return distance;
-    }
-
-    public static List<Integer> simulatedAnnealing(double[][] tsp_g, List<Integer> tour, double temperature, double coolingRate) {
-        List<Integer> bestTour = new ArrayList<>(tour);
-        List<Integer> currentTour = new ArrayList<>(tour);
-
-        while (temperature > 1) {
-            List<Integer> newTour = new ArrayList<>(currentTour);
-            int tourSize = newTour.size();
-
-            // Generate two random indices
-            int i = (int) (Math.random() * tourSize);
-            int j = (int) (Math.random() * tourSize);
-
-            // Swap the cities at those indices
-            int temp = newTour.get(i);
-            newTour.set(i, newTour.get(j));
-            newTour.set(j, temp);
-
-            // Calculate the new cost and the change in cost
-            double currentCost = calculateTourCost(tsp_g, currentTour);
-            double newCost = calculateTourCost(tsp_g, newTour);
-            double delta = newCost - currentCost;
-
-            // Decide whether to accept the new tour
-            if (delta < 0 || Math.exp(-delta / temperature) > Math.random()) {
-                currentTour = new ArrayList<>(newTour);
-                if (newCost < calculateTourCost(tsp_g, bestTour)) {
-                    bestTour = new ArrayList<>(newTour);
-                }
-            }
-
-            // Decrease the temperature
-            temperature *= coolingRate;
-        }
-
-        return bestTour;
     }
 
 }

@@ -58,18 +58,18 @@ public class Christofides {
                 }
             }
         }
-        System.out.println("\n Minimum Cost Christofide's is: " + minCost);
+        System.out.println("\nMinimum Cost Christofide's is: " + minCost + "\n");
 
         double[][] combined = combine(mst, matching);
         List<Integer> eulerTour = getEulerTour(combined, index);
         // Calculate cost of each tour and optimization
         List<Integer> hamiltonianTwoOpt = TwoOptSwapOptimization.getHamiltonianTourTwoOpt(eulerTour, tsp_g, points);
         double costTwoOpt = calculateTourCost(tsp_g, hamiltonianTwoOpt);
-        System.out.println("\n Minimum Cost Two Opt is: " + costTwoOpt);
+        System.out.println("\nMinimum Cost Two Opt is: " + costTwoOpt + "\n");
 
 //        List<Integer> hamiltonianThreeOpt = ThreeOptSwapOptimization.getHamiltonianTourThreeOpt(eulerTour, tsp_g, points);
 //        double costThreeOpt = calculateTourCost(tsp_g, hamiltonianThreeOpt);
-//        System.out.println("Minimum Cost Three Opt is: " + costThreeOpt);
+//        System.out.println("\nMinimum Cost Three Opt is: " + costThreeOpt + "\n");
 
 //        List<Integer> annealedTour = simulatedAnnealing(tsp_g, hamiltonianTwoOpt, 1000000, 0.01);
 //        double costSimulatedAnnealing = calculateTourCost(tsp_g, annealedTour);
@@ -219,6 +219,5 @@ public class Christofides {
 
         return bestTour;
     }
-
 
 }

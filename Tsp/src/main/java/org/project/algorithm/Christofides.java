@@ -1,12 +1,15 @@
 package org.project.algorithm;
 
 import org.project.entity.Point;
+import org.project.optimization.ThreeOptSwapOptimization;
+import org.project.optimization.TwoOptSwapOptimization;
 
 import java.util.*;
 
 public class Christofides {
 
     public static void tsp(List<Point> points) {
+
         int n1 = points.size();
         double[][] tsp_g = new double[n1][n1];
         for (int i = 0; i < n1; i++) {
@@ -18,87 +21,59 @@ public class Christofides {
         }
         int n = tsp_g.length;
 
-        // Step 1: Find a minimum spanning tree
-        double[][] mst = primMST(tsp_g);
+        //Find a minimum spanning tree
+        double[][] mst = MinimumSpanningTree.primMST(tsp_g);
 
-        // Step 2: Find the set of vertices with odd degree
+        //Find the set of vertices with odd degree
         List<Integer> oddVertices = getOddVertices(mst);
 
-        // Step 3: Find minimum weight perfect matching for the odd vertices
+        //Find minimum weight perfect matching for the odd vertices
         double[][] matching = getMinimumMatching(tsp_g, oddVertices);
 
-        // Step 4: Combine the minimum spanning tree and minimum weight perfect matching
+        //Combine the minimum spanning tree and minimum weight perfect matching
+
+        double minCost = Double.POSITIVE_INFINITY;
+        List<Integer> finalTour = new ArrayList<>();
+        int index = 0;
+        for(int i=0; i<n1; i++) {
+            double[][] combined = combine(mst, matching);
+            //Generate a Eulerian tour
+            List<Integer> eulerTour = getEulerTour(combined, i);
+
+            //Generate a Hamiltonian tour from the Eulerian tour
+            List<Integer> hamiltonianTour = getHamiltonianTour(eulerTour);
+
+            double cost = calculateTourCost(tsp_g, hamiltonianTour);
+
+            if(cost < minCost) {
+                minCost = cost;
+                finalTour = hamiltonianTour;
+                index = i;
+            }
+        }
+        for(Integer tour : finalTour) {
+            for(Point point : points) {
+                if(point.getId().equals(tour)) {
+                    System.out.print(point.getCrimeId() + "->");
+                }
+            }
+        }
+        System.out.println("\n Minimum Cost Christofide's is: " + minCost);
+
         double[][] combined = combine(mst, matching);
-
-        // Step 5: Generate a Eulerian tour
-        List<Integer> eulerTour = getEulerTour(combined, 0);
-
-        // Step 6: Generate a Hamiltonian tour from the Eulerian tour
-        List<Integer> hamiltonianTour = getHamiltonianTour(eulerTour, points);
-
-        List<Integer> hamiltonianTwoOpt = getHamiltonianTourTwoOpt(eulerTour, tsp_g);
-
-//        List<Integer> hamiltonianThreeOpt = getHamiltonianTourThreeOpt(eulerTour, tsp_g);
-
-        List<Integer> annealedTour = simulatedAnnealing(tsp_g, hamiltonianTwoOpt, 1000000, 0.01);
-
-        // Step 7: Calculate the total cost of the Hamiltonian tour
-        double cost = calculateTourCost(tsp_g, hamiltonianTour);
+        List<Integer> eulerTour = getEulerTour(combined, index);
+        // Calculate cost of each tour and optimization
+        List<Integer> hamiltonianTwoOpt = TwoOptSwapOptimization.getHamiltonianTourTwoOpt(eulerTour, tsp_g, points);
         double costTwoOpt = calculateTourCost(tsp_g, hamiltonianTwoOpt);
+        System.out.println("\n Minimum Cost Two Opt is: " + costTwoOpt);
+
+//        List<Integer> hamiltonianThreeOpt = ThreeOptSwapOptimization.getHamiltonianTourThreeOpt(eulerTour, tsp_g, points);
 //        double costThreeOpt = calculateTourCost(tsp_g, hamiltonianThreeOpt);
-        double costSimulatedAnnealing = calculateTourCost(tsp_g, annealedTour);
-
-        System.out.println("Minimum Cost is: " + cost);
-        System.out.println("Minimum Cost Two Opt is: " + costTwoOpt);
 //        System.out.println("Minimum Cost Three Opt is: " + costThreeOpt);
-        System.out.println("Minimum Cost Simulated Annealing is: " + costSimulatedAnnealing);
 
-    }
-
-    public static double[][] primMST(double[][] graph) {
-        int n = graph.length;
-        double[][] mst = new double[n][n];
-        boolean[] visited = new boolean[n];
-        double[] key = new double[n];
-        int[] parent = new int[n];
-
-        for (int i = 0; i < n; i++) {
-            key[i] = Double.POSITIVE_INFINITY;
-        }
-
-        key[0] = 0;
-        parent[0] = -1;
-
-        for (int i = 0; i < n - 1; i++) {
-            int u = -1;
-            for (int j = 0; j < n; j++) {
-                if (!visited[j] && (u == -1 || key[j] < key[u])) {
-                    u = j;
-                }
-            }
-            visited[u] = true;
-
-            for (int v = 0; v < n; v++) {
-                if (graph[u][v] != 0 && !visited[v] && graph[u][v] < key[v]) {
-                    parent[v] = u;
-                    key[v] = graph[u][v];
-                }
-            }
-        }
-
-        for (int i = 1; i < n; i++) {
-            mst[parent[i]][i] = graph[parent[i]][i];
-            mst[i][parent[i]] = graph[parent[i]][i];
-        }
-
-        double cost = 0.0;
-        for(int i=0; i<mst.length; i++) {
-            for(int j=0; j<mst.length; j++) {
-                cost += mst[i][j];
-            }
-        }
-        System.out.println(cost/2.0);
-        return mst;
+//        List<Integer> annealedTour = simulatedAnnealing(tsp_g, hamiltonianTwoOpt, 1000000, 0.01);
+//        double costSimulatedAnnealing = calculateTourCost(tsp_g, annealedTour);
+//        System.out.println("Minimum Cost Simulated Annealing is: " + costSimulatedAnnealing);
     }
 
     private static List<Integer> getOddVertices(double[][] graph) {
@@ -145,7 +120,6 @@ public class Christofides {
         return combined;
     }
 
-    // Step 5: Generate a Eulerian tour
     public static List<Integer> getEulerTour(double[][] graph, int start) {
         List<Integer> tour = new ArrayList<>();
 
@@ -168,8 +142,7 @@ public class Christofides {
         return tour;
     }
 
-    // Step 6: Generate a Hamiltonian tour from the Eulerian tour
-    public static List<Integer> getHamiltonianTour(List<Integer> eulerTour, List<Point> points) {
+    public static List<Integer> getHamiltonianTour(List<Integer> eulerTour) {
         Set<Integer> visited = new HashSet<>();
         List<Integer> hamiltonianTour = new ArrayList<>();
 
@@ -181,17 +154,9 @@ public class Christofides {
         }
 
         hamiltonianTour.add(eulerTour.get(0)); // Add the starting vertex to complete the tour
-        for(Integer tour : hamiltonianTour) {
-            for(Point point : points) {
-                if(point.getId().equals(tour)) {
-                    System.out.println(point.getCrimeId() + "->");
-                }
-            }
-        }
         return hamiltonianTour;
     }
 
-    // Step 7: Calculate the total cost of the Hamiltonian tour
     public static double calculateTourCost(double[][] graph, List<Integer> tour) {
         double cost = 0.0;
         int prev = tour.get(0);
@@ -215,91 +180,7 @@ public class Christofides {
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         double distance = radius * c;
-//        System.out.println(lat1 + " " + lon1 + " " + lat2 + " " + lon2 + " = " + distance);
         return distance;
-    }
-
-    private static List<Integer> getHamiltonianTourTwoOpt(List<Integer> eulerTour, double[][] tsp_g) {
-        List<Integer> tour = new ArrayList<>(eulerTour);
-        boolean improved = true;
-        while (improved) {
-            improved = false;
-            for (int i = 1; i < tour.size() - 2; i++) {
-                for (int j = i + 1; j < tour.size() - 1; j++) {
-                    List<Integer> newTour = twoOptSwap(tour, i, j);
-                    double newCost = calculateTourCost(tsp_g, newTour);
-                    if (newCost < calculateTourCost(tsp_g, tour)) {
-                        tour = newTour;
-                        improved = true;
-                    }
-                }
-            }
-        }
-        tour.add(eulerTour.get(0));
-        return tour;
-    }
-
-    private static List<Integer> twoOptSwap(List<Integer> tour, int i, int j) {
-        List<Integer> newTour = new ArrayList<>();
-        for (int k = 0; k < i; k++) {
-            newTour.add(tour.get(k));
-        }
-        for (int k = j; k >= i; k--) {
-            newTour.add(tour.get(k));
-        }
-        for (int k = j + 1; k < tour.size(); k++) {
-            newTour.add(tour.get(k));
-        }
-        return newTour;
-    }
-
-    public static List<Integer> getHamiltonianTourThreeOpt(List<Integer> eulerTour, double[][] tsp_g) {
-        List<Integer> tour = new ArrayList<>(eulerTour);
-        int n = tour.size();
-        boolean improvement = true;
-        while (improvement) {
-            improvement = false;
-            for (int i = 0; i < n - 2; i++) {
-                for (int j = i + 2; j < n - 1; j++) {
-                    for (int k = j + 2; k < n; k++) {
-                        double oldCost = calculateTourCost(tour, tsp_g);
-                        List<Integer> newTour = reverseSubtour(tour, i + 1, j, k);
-                        double newCost = calculateTourCost(newTour, tsp_g);
-                        if (newCost < oldCost) {
-                            tour = newTour;
-                            improvement = true;
-                        }
-                    }
-                }
-            }
-        }
-        return tour;
-    }
-
-    public static List<Integer> reverseSubtour(List<Integer> tour, int i, int j, int k) {
-        List<Integer> newTour = new ArrayList<>();
-        for (int x = 0; x < i; x++) {
-            newTour.add(tour.get(x));
-        }
-        for (int x = j; x >= i; x--) {
-            newTour.add(tour.get(x));
-        }
-        for (int x = k; x > j; x--) {
-            newTour.add(tour.get(x));
-        }
-        for (int x = k + 1; x < tour.size(); x++) {
-            newTour.add(tour.get(x));
-        }
-        return newTour;
-    }
-
-    public static double calculateTourCost(List<Integer> tour, double[][] tsp_g) {
-        double cost = 0;
-        for (int i = 0; i < tour.size() - 1; i++) {
-            cost += tsp_g[tour.get(i)][tour.get(i + 1)];
-        }
-        cost += tsp_g[tour.get(tour.size() - 1)][tour.get(0)];
-        return cost;
     }
 
     public static List<Integer> simulatedAnnealing(double[][] tsp_g, List<Integer> tour, double temperature, double coolingRate) {

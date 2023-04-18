@@ -6,6 +6,7 @@ public class Point {
     Double latitude;
     Double longitude;
     Integer id;
+
     public String getCrimeId() {
         return crimeId;
     }

@@ -1,7 +1,12 @@
-package com.info6205.project.optimization;
+package org.project.optimization;
+
+import org.project.entity.Point;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ThreeOptSwapOptimization {
-    public static List<Integer> getHamiltonianTourThreeOpt(List<Integer> eulerTour, double[][] tsp_g) {
+    public static List<Integer> getHamiltonianTourThreeOpt(List<Integer> eulerTour, double[][] tsp_g, List<Point> points) {
         List<Integer> tour = new ArrayList<>(eulerTour);
         int n = tour.size();
         boolean improvement = true;
@@ -18,6 +23,13 @@ public class ThreeOptSwapOptimization {
                             improvement = true;
                         }
                     }
+                }
+            }
+        }
+        for(Integer tour1 : tour) {
+            for(Point point : points) {
+                if(point.getId().equals(tour1)) {
+                    System.out.println(point.getCrimeId() + "->");
                 }
             }
         }

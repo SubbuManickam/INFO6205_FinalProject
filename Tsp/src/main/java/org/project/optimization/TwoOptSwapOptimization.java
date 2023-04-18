@@ -1,7 +1,12 @@
-package com.info6205.project.optimization;
+package org.project.optimization;
+
+import org.project.entity.Point;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TwoOptSwapOptimization {
-    private static List<Integer> getHamiltonianTourTwoOpt(List<Integer> eulerTour, double[][] tsp_g) {
+    public static List<Integer> getHamiltonianTourTwoOpt(List<Integer> eulerTour, double[][] tsp_g, List<Point> points) {
         List<Integer> tour = new ArrayList<>(eulerTour);
         boolean improved = true;
         while (improved) {
@@ -17,10 +22,18 @@ public class TwoOptSwapOptimization {
                 }
             }
         }
+        tour.add(eulerTour.get(0));
+        for(Integer tour1 : tour) {
+            for(Point point : points) {
+                if(point.getId().equals(tour1)) {
+                    System.out.print(point.getCrimeId() + "->");
+                }
+            }
+        }
         return tour;
     }
 
-    private static List<Integer> twoOptSwap(List<Integer> tour, int i, int j) {
+    public static List<Integer> twoOptSwap(List<Integer> tour, int i, int j) {
         List<Integer> newTour = new ArrayList<>();
         for (int k = 0; k < i; k++) {
             newTour.add(tour.get(k));

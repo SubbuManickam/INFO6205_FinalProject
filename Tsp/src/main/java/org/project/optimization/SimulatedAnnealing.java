@@ -1,60 +1,88 @@
 package org.project.optimization;
 
+import org.project.entity.Point;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class SimulatedAnnealing {
-        // The objective function to be optimized
-        private static double objectiveFunction(double x) {
-            return Math.sin(x) + Math.sin(10/3 * x);
-        }
 
-        public static void main(String[] args) {
+    private static final double MAX_TEMPERATURE = 10000;
+    private static final double MIN_TEMPERATURE = 1;
+    private static final double COOLING_RATE = 0.001;
 
-            // Set the initial temperature and cooling rate
-            double initialTemperature = 1000;
-            double coolingRate = 0.003;
+    public static double simulate(List<Integer> cities, double[][] distances, List<Point> points) {
+        double temp = MAX_TEMPERATURE;
 
-            // Set the initial state (i.e., the initial value of x)
-            double currentState = 0.0;
+        List<Integer> actualState = new ArrayList<>(cities);
+        List<Integer> bestState = new ArrayList<>(actualState);
+        double bestStateCost = calculateTourCost(distances, bestState);
 
-            // Set the best state and best objective function value
-            double bestState = currentState;
-            double bestObjectiveFunctionValue = objectiveFunction(currentState);
+//        System.out.println("Initial solution distance: " + bestStateCost);
 
-            // Loop until the temperature is zero
-            while (initialTemperature > 1) {
+        while (temp > MIN_TEMPERATURE) {
+            List<Integer> nextState = generateNeighborState(actualState);
 
-                // Choose a random neighbor of the current state
-                double neighbor = currentState + (Math.random() * 2 - 1) * initialTemperature;
+            double currentEnergy = calculateTourCost(distances, actualState);
+            double neighborEnergy = calculateTourCost(distances, nextState);
 
-                // Calculate the objective function value for the neighbor
-                double neighborObjectiveFunctionValue = objectiveFunction(neighbor);
-
-                // Calculate the difference in objective function values between the current state and the neighbor
-                double delta = neighborObjectiveFunctionValue - bestObjectiveFunctionValue;
-
-                // If the neighbor has a better objective function value, move to the neighbor
-                if (delta < 0) {
-                    currentState = neighbor;
-                    bestObjectiveFunctionValue = neighborObjectiveFunctionValue;
-
-                    // If the neighbor is the best state so far, update the best state
-                    if (bestObjectiveFunctionValue < objectiveFunction(bestState)) {
-                        bestState = currentState;
-                    }
-
-                    // If the neighbor has a worse objective function value, move to the neighbor with a certain probability
-                } else {
-                    double probability = Math.exp(-delta / initialTemperature);
-                    if (Math.random() < probability) {
-                        currentState = neighbor;
-                    }
-                }
-
-                // Cool down the temperature
-                initialTemperature *= 1 - coolingRate;
+//            System.out.println("Acceptance probability " + acceptanceProbability(currentEnergy, neighborEnergy, temp));
+            if (acceptanceProbability(currentEnergy, neighborEnergy, temp) > Math.random()) {
+                actualState = new ArrayList<>(nextState);
+            }
+            double currentCost = calculateTourCost(distances, actualState);
+//            System.out.println("Best state cost "+ currentCost);
+            if (currentCost < bestStateCost) {
+                bestState = new ArrayList<>(actualState);
+                bestStateCost = currentCost;
             }
 
-            // Print the best state and best objective function value
-            System.out.println("Best state: " + bestState);
-            System.out.println("Best objective function value: " + objectiveFunction(bestState));
+            temp *= 1 - COOLING_RATE;
         }
+        for(Integer tour : bestState) {
+            for(Point point : points) {
+                if(point.getId().equals(tour)) {
+                    System.out.print(point.getCrimeId() + "->");
+                }
+            }
+        }
+        return bestStateCost;
+    }
+
+    private static List<Integer> generateNeighborState(List<Integer> actualState) {
+        List<Integer> newState = new ArrayList<>(actualState);
+
+        int randomIndex1 = (int) (Math.random() * 10);
+        int randomIndex2 = (int) (Math.random() * 10);
+
+        int city1 = newState.get(randomIndex1);
+        int city2 = newState.get(randomIndex2);
+
+        newState.set(randomIndex1, city2);
+        newState.set(randomIndex2, city1);
+
+        return newState;
+    }
+
+    private static double acceptanceProbability(double currentEnergy, double neighborEnergy, double temp) {
+        if (neighborEnergy < currentEnergy) {
+            return 1.0;
+        }
+        return Math.exp((currentEnergy - neighborEnergy) / temp);
+    }
+
+    private static double calculateTourCost(double[][] distances, List<Integer> tour) {
+        double cost = 0.0;
+
+        int prev = tour.get(0);
+
+
+        for (int i = 1; i < tour.size(); i++) {
+            int curr = tour.get(i);
+            cost = cost + distances[prev][curr];
+            prev = curr;
+        }
+
+        return cost;
+    }
 }

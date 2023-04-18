@@ -62,11 +62,16 @@ public class GreedyAlgorithm {
             }
             cost += min;
 
-            // Started from the node where
-            // we finished as well.
-            System.out.print("Minimum Cost Greedy Algorithm is : ");
-            System.out.println(cost);
+            for(int tour=0; tour<path.length; tour++) {
+                for(Point point : points) {
+                    if(point.getId().equals(tour)) {
+                        System.out.print(point.getCrimeId() + "->");
+                    }
+                }
+            }
 
+            System.out.print("\nMinimum Cost Greedy Algorithm is : ");
+            System.out.println(cost);
         }
 
     public static double calculateDistance(Double lat1, Double lon1, Double lat2, Double lon2) {
@@ -79,7 +84,7 @@ public class GreedyAlgorithm {
                         Math.sin(dLon/2) * Math.sin(dLon/2);
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        double distance = radius * c;
+        double distance = radius * c * 1000;
         return distance;
     }
 

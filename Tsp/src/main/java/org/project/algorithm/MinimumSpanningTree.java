@@ -38,13 +38,18 @@ public class MinimumSpanningTree {
             mst[i][parent[i]] = graph[parent[i]][i];
         }
 
+        double cost = calculateMSTCost(mst);
+        return mst;
+    }
+
+    public static double calculateMSTCost(double[][] mst) {
         double cost = 0.0;
         for(int i=0; i<mst.length; i++) {
             for(int j=0; j<mst.length; j++) {
                 cost += mst[i][j];
             }
         }
-        System.out.println("Cost Minimum Spanning Tree is: " + cost/2.0);
-        return mst;
+        System.out.println("\nCost Minimum Spanning Tree is: " + cost/2.0 + "\n");
+        return cost/2.0;
     }
 }

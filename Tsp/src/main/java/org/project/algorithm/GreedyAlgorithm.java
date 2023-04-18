@@ -64,7 +64,7 @@ public class GreedyAlgorithm {
 
             // Started from the node where
             // we finished as well.
-            System.out.print("Minimum Cost is : ");
+            System.out.print("Minimum Cost Greedy Algorithm is : ");
             System.out.println(cost);
 
         }

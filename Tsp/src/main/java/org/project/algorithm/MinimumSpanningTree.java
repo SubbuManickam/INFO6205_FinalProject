@@ -1,54 +1,50 @@
 package org.project.algorithm;
 
-import org.project.entity.Connect;
-import org.project.entity.DisjointSet;
-import org.project.entity.Point;
-
-import java.util.*;
-
 public class MinimumSpanningTree {
 
-    public static List<Connect> addConnections(List<Point> points) {
-        List<Connect> connections = new ArrayList<>();
-        PriorityQueue<Connect> pq = new PriorityQueue<>();
-        double totalWeight = 0.0;
+    public static double[][] primMST(double[][] graph) {
+        int n = graph.length;
+        double[][] mst = new double[n][n];
+        boolean[] visited = new boolean[n];
+        double[] key = new double[n];
+        int[] parent = new int[n];
 
-        for (int i = 0; i < points.size() - 1; i++) {
-            Point point1 = points.get(i);
-            for (int j = i + 1; j < points.size(); j++) {
-                Point point2 = points.get(j);
-                double distance = calculateDistance(point1.getLatitude(), point1.getLongitude(), point2.getLatitude(), point2.getLongitude());
-                Connect connect = new Connect(point1, point2, distance);
-                pq.add(connect);
-                connections.add(connect);
+        for (int i = 0; i < n; i++) {
+            key[i] = Double.POSITIVE_INFINITY;
+        }
+
+        key[0] = 0;
+        parent[0] = -1;
+
+        for (int i = 0; i < n - 1; i++) {
+            int u = -1;
+            for (int j = 0; j < n; j++) {
+                if (!visited[j] && (u == -1 || key[j] < key[u])) {
+                    u = j;
+                }
+            }
+            visited[u] = true;
+
+            for (int v = 0; v < n; v++) {
+                if (graph[u][v] != 0 && !visited[v] && graph[u][v] < key[v]) {
+                    parent[v] = u;
+                    key[v] = graph[u][v];
+                }
             }
         }
-        DisjointSet<Point> ds = new DisjointSet<>(points);
-        while (!pq.isEmpty() && ds.count() > 1) {
-            Connect e = pq.poll();
-            Point u = e.getFrom();
-            Point v = e.getTo();
 
-            if (ds.find(u) != ds.find(v)) {
-                ds.union(u, v);
-                totalWeight += e.getWeight();
+        for (int i = 1; i < n; i++) {
+            mst[parent[i]][i] = graph[parent[i]][i];
+            mst[i][parent[i]] = graph[parent[i]][i];
+        }
+
+        double cost = 0.0;
+        for(int i=0; i<mst.length; i++) {
+            for(int j=0; j<mst.length; j++) {
+                cost += mst[i][j];
             }
         }
-        System.out.println(totalWeight);
-        return connections;
-    }
-
-    public static double calculateDistance(Double lat1, Double lon1, Double lat2, Double lon2) {
-        double radius = 6371;
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
-
-        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                        Math.sin(dLon/2) * Math.sin(dLon/2);
-
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        double distance = radius * c;
-        return distance;
+        System.out.println("Cost Minimum Spanning Tree is: " + cost/2.0);
+        return mst;
     }
 }

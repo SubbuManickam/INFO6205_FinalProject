@@ -1,4 +1,4 @@
-package com.info6205.project.optimization;
+package org.project.optimization;
 
 public class SimulatedAnnealing {
         // The objective function to be optimized

@@ -3,6 +3,9 @@ package com.info6205.project.optimization;
 import Display.*;
 import Graph.*;
 
+/**
+ * Solves the Traveling Salesman Problem using vanilla Ant Colony Optimization.
+ */
 public class AntColonyOptimization {
 
     private Graph graph;

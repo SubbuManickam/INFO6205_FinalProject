@@ -3,9 +3,6 @@ package org.project.optimization;
 import java.util.ArrayList;
 import java.util.Random;
 
-/**
- * Solves the Traveling Salesman Problem using vanilla Ant Colony Optimization.
- */
 public class AntColonyOptimization {
 
         private double[][] graph;

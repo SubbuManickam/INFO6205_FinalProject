@@ -23,16 +23,16 @@ public class Christofides {
         }
         int n = tsp_g.length;
 
-        //Find a minimum spanning tree
+        //Find minimum spanning tree
         double[][] mst = MinimumSpanningTree.primMST(tsp_g);
 
-        //Find the set of vertices with odd degree
+        //Find vertices with odd degrees
         List<Integer> oddVertices = getOddVertices(mst);
 
         //Find minimum weight perfect matching for the odd vertices
         double[][] matching = getMinimumMatching(tsp_g, oddVertices);
 
-        //Combine the minimum spanning tree and minimum weight perfect matching
+        //Combine the minimum spanning tree and minimum weight perfect matching and swap different start points to find the minimum cost point
         double minCost = Double.POSITIVE_INFINITY;
         List<Integer> finalTour = new ArrayList<>();
         int index = 0;
@@ -63,6 +63,7 @@ public class Christofides {
 
         double[][] combined = combine(mst, matching);
         List<Integer> eulerTour = getEulerTour(combined, index);
+
         // Calculate cost of each tour and optimization
         List<Integer> hamiltonianTwoOpt = TwoOptSwapOptimization.getHamiltonianTourTwoOpt(eulerTour, tsp_g, points);
         double costTwoOpt = calculateTourCost(tsp_g, hamiltonianTwoOpt);
@@ -73,10 +74,8 @@ public class Christofides {
         System.out.println("\nMinimum Cost Three Opt is: " + costThreeOpt + "\n");
 
         double annealedTour = SimulatedAnnealing.simulate(hamiltonianTwoOpt, tsp_g, points);
-//        double costSimulatedAnnealing = calculateTourCost(tsp_g, annealedTour);
         System.out.println("\nMinimum Cost Simulated Annealing is: " + annealedTour + "\n");
 
-//
 //        int numAnts = 10;
 //        double alpha = 1.0;
 //        double beta = 5.0;
@@ -84,15 +83,14 @@ public class Christofides {
 //        double initialPheromone = 0.1;
 //        int maxIterations = 100;
 //
-//// Create an instance of the AntColonyOptimizationTSP class
+//   Create an instance of the AntColonyOptimizationTSP class
 //        AntColonyOptimization acoTSP = new AntColonyOptimization(
 //                tsp_g, numAnts, alpha, beta, evaporationRate, initialPheromone, maxIterations);
 //
-//// Solve the TSP problem using the ACO algorithm
+//   Solve the TSP problem using the ACO algorithm
 //        ArrayList<Integer> bestTour = acoTSP.solve();
 //        double costAnt = calculateTourCost(tsp_g, bestTour);
 //        System.out.println("\nMinimum Cost Ant is: " + costAnt + "\n");
-
     }
 
     public static List<Integer> getOddVertices(double[][] graph) {

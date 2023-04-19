@@ -22,7 +22,7 @@ public class GreedyAlgorithm {
             int j = 0, i = 0;
             double min = Double.MAX_VALUE;
             List<Integer> visited = new ArrayList<>();
-            // The problem starts from 0th index city
+
             visited.add(0);
             int[] path = new int[tsp_g.length];
             while (i < tsp_g.length && j < tsp_g[i].length) {
@@ -30,7 +30,6 @@ public class GreedyAlgorithm {
                     break;
                 }
 
-                // If the city is unvisited and has minimum cost, update the cost
                 if (j != i && !(visited.contains(j))) {
                     if (tsp_g[i][j] < min) {
                         min = tsp_g[i][j];
@@ -39,8 +38,6 @@ public class GreedyAlgorithm {
                 }
                 j++;
 
-                // Check all paths from the
-                // ith indexed city
                 if (j == tsp_g[i].length) {
                     cost += min;
                     min = Double.MAX_VALUE;
@@ -51,8 +48,6 @@ public class GreedyAlgorithm {
                 }
             }
 
-            // Update the ending city in array
-            // from city which was last visited
             i = path[count - 1] - 1;
             for (j = 0; j < tsp_g.length; j++) {
                 if ((i != j) && tsp_g[i][j] < min) {

@@ -18,20 +18,17 @@ public class SimulatedAnnealing {
         List<Integer> bestState = new ArrayList<>(actualState);
         double bestStateCost = calculateTourCost(distances, bestState);
 
-//        System.out.println("Initial solution distance: " + bestStateCost);
-
         while (temp > MIN_TEMPERATURE) {
             List<Integer> nextState = generateNeighborState(actualState);
 
             double currentEnergy = calculateTourCost(distances, actualState);
             double neighborEnergy = calculateTourCost(distances, nextState);
 
-//            System.out.println("Acceptance probability " + acceptanceProbability(currentEnergy, neighborEnergy, temp));
             if (acceptanceProbability(currentEnergy, neighborEnergy, temp) > Math.random()) {
                 actualState = new ArrayList<>(nextState);
             }
             double currentCost = calculateTourCost(distances, actualState);
-//            System.out.println("Best state cost "+ currentCost);
+
             if (currentCost < bestStateCost) {
                 bestState = new ArrayList<>(actualState);
                 bestStateCost = currentCost;
@@ -76,13 +73,11 @@ public class SimulatedAnnealing {
 
         int prev = tour.get(0);
 
-
         for (int i = 1; i < tour.size(); i++) {
             int curr = tour.get(i);
             cost = cost + distances[prev][curr];
             prev = curr;
         }
-
         return cost;
     }
 }
